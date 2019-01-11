@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-
+#
 # Slack Mutli-Teams Overview.
 #
 # by Harry Löwen
@@ -13,18 +13,18 @@
 # https://api.slack.com/custom-integrations/legacy-tokens
 #
 # Refresh rate is set to every minute.
-# Because: 180+ lines of code and 4 requests running per team (one channel, one user)
+# Because: 180+ lines of code and 4+ requests running per team (one channel, one user)
 # For a simple unread indicator check out: https://github.com/matryer/bitbar-plugins/blob/master/Messenger/slack-unread.1s.py
 #
-# Feel free to customize settings, colors, all done messages, etc.
-
+# Feel free to customize settings, colors, all-done-messages, etc.
+#
 # metadata
-# <bitbar.title>Slack Mulit-Teams Overview</bitbar.title>
+# <bitbar.title>Slack Multi-Teams Overview</bitbar.title>
 # <bitbar.version>v1.0</bitbar.version>
 # <bitbar.author>Harry Löwen</bitbar.author>
 # <bitbar.author.github>harryloewen</bitbar.author.github>
 # <bitbar.desc>Provides an overview of unread channels, unread messages and channel histories.</bitbar.desc>
-# <bitbar.image>https://drive.google.com/uc?export=download&id=1vxQ5qr8opWaHhiqFlJZmi0oCOG3ik0uJ</bitbar.image>
+# <bitbar.image>https://drive.google.com/uc?export=preview&id=1vxQ5qr8opWaHhiqFlJZmi0oCOG3ik0uJ</bitbar.image>
 # <bitbar.dependencies>ruby<bitbar.dependencies>
 # <bitbar.abouturl>https://github.com/harryloewen/bitbar-slack-multi-teams/</bitbar.abouturl>
 
@@ -34,12 +34,12 @@ require 'json'
 
 # your token(s) please
 TOKENS = [
-  # 'xoxp-your-slack-workspace-token',
-  # 'xoxp-another-workspace-token',
+  'xoxp-your-slack-token',
+  'xoxp-another-slack-token',
 ].freeze
 
 # display all channels or only those with unread messages
-ALL_CHANNELS = true
+ALL_CHANNELS = false
 
 # your default color
 COLOR = '#696969'.freeze # '#696969' works in darkmode as well
@@ -106,13 +106,17 @@ def find_user(message)
   if message['user']
     '@' + message['user']
   elsif message['bot_id']
-    'Bot' # TODO: find bot's name
+    if message['attachments']
+      message['attachments'][0]['service_name']
+    else
+      'Bot'
+    end
   end
 end
 
 def find_text(message)
   return '...' unless message['type'] == 'message'
-  if message['text']
+  if !message['text'].nil? && !message['text'].empty?
     message['text'].tr("\n", ' ').tr("\r", ' ')
   elsif message['attachments']
     message['attachments'].first['text'].tr("\n", ' ').tr("\r", ' ')
